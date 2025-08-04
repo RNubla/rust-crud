@@ -1,6 +1,6 @@
 mod crud;
 mod person;
-use std::io;
+use std::io::{self, Write};
 
 use crud::{Crud, CrudTrait};
 use person::{Person, PersonTrait};
@@ -42,35 +42,34 @@ fn main() {
 }
 
 fn handle_create_user(user_crud: &mut Crud<Person>) {
-    loop {
-        // println!(" Enter id");
-        let id = user_crud.data.len() + 1;
+    let id = user_crud.data.len() as i64 + 1;
 
-        println!(" Enter first name");
-        let mut f_name = String::new();
-        io::stdin()
-            .read_line(&mut f_name)
-            .expect("Failed to read line");
+    let first_name = prompt("Enter first name: ");
+    let last_name = prompt("Enter last name: ");
+    let age: i64 = loop {
+        let input = prompt("Enter age: ");
+        match input.trim().parse::<i64>() {
+            Ok(n) => break n,
+            Err(_) => println!("Invalid age. Please enter a number."),
+        }
+    };
+    let person = Person {
+        first_name: first_name.trim().to_string(),
+        last_name: last_name.trim().to_string(),
+        id,
+        age,
+    };
 
-        println!(" Enter last name");
-        let mut l_name = String::new();
-        io::stdin()
-            .read_line(&mut l_name)
-            .expect("Failed to read line");
+    user_crud.create(person);
+    println!("User created successfully.");
+}
 
-        println!(" Enter age name");
-        let mut age = String::new();
-        io::stdin()
-            .read_line(&mut age)
-            .expect("Failed to read line");
-
-        let person = Person {
-            first_name: f_name.trim().to_string(),
-            last_name: l_name.trim().to_string(),
-            id: id as i64,
-            age: age.trim().parse().expect("Age is not a string"),
-        };
-        user_crud.create(person);
-        break;
-    }
+fn prompt(message: &str) -> String {
+    print!("{}", message);
+    io::stdout().flush().unwrap(); // make sure the prompt shows
+    let mut input = String::new();
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+    input
 }
