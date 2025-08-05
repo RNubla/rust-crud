@@ -29,15 +29,45 @@ fn main() {
             "c" => {
                 handle_create_user(&mut user_crud);
             }
-            "r" => println!("read user"),
+            "r" => {
+                handle_read_user(&user_crud);
+            }
             "u" => println!("update user"),
-            "d" => println!("delete user"),
+            "d" => handle_delete_user(&mut user_crud),
             "q" => {
                 println!("Quitting....");
                 break;
             }
             _ => println!("Invalid Options. Please try again"),
         }
+    }
+}
+
+fn handle_delete_user(user_crud: &mut Crud<Person>) {
+    let user_id = loop {
+        let input = prompt("Enter user id: ");
+        match input.trim().parse::<i64>() {
+            Ok(n) => break n,
+            Err(_) => println!("Invalid id type"),
+        }
+    };
+    user_crud.delete(user_id);
+    println!("{:?}", user_crud.read_all_data())
+}
+
+fn handle_read_user(user_crud: &Crud<Person>) {
+    let user_id = loop {
+        let input = prompt("Enter user id: ");
+        match input.trim().parse::<i64>() {
+            Ok(n) => break n,
+            Err(_) => println!("Invalid id type"),
+        }
+    };
+
+    if let Some(person) = user_crud.read_item(user_id) {
+        println!("{}", person.first_name);
+    } else {
+        println!("Not found");
     }
 }
 
